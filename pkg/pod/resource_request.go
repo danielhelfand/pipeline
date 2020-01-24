@@ -42,6 +42,8 @@ func resolveResourceRequests(containers []corev1.Container, limitRange *corev1.L
 		}
 	}
 
+	// Search LimitRangeItems for Container type. Set min to minimum of
+	//
 	limitRangeItems := limitRange.Spec.Limits
 	min := allZeroQty()
 	if limitRange != emptyLimitRange {
