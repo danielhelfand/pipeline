@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Tekton Authors
+Copyright 2020 The Tekton Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -54,6 +54,11 @@ func (trs *TaskRunSpec) SetDefaults(ctx context.Context) {
 	defaultSA := cfg.Defaults.DefaultServiceAccount
 	if trs.ServiceAccountName == "" && defaultSA != "" {
 		trs.ServiceAccountName = defaultSA
+	}
+
+	defaultLimitRange := cfg.Defaults.DefaultLimitRange
+	if trs.LimitRangeName == "" && defaultLimitRange != "" {
+		trs.LimitRangeName = defaultLimitRange
 	}
 
 	// If this taskrun has an embedded task, apply the usual task defaults

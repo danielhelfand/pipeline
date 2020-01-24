@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Tekton Authors
+Copyright 2020 The Tekton Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ var resourceQuantityCmp = cmp.Comparer(func(x, y resource.Quantity) bool {
 	return x.Cmp(y) == 0
 })
 
-func TestResolveResourceRequests(t *testing.T) {
+func TestResolveResourceRequests_NoLimitRange(t *testing.T) {
 	for _, c := range []struct {
 		desc     string
 		in, want []corev1.Container
@@ -95,7 +95,94 @@ func TestResolveResourceRequests(t *testing.T) {
 		}},
 	}} {
 		t.Run(c.desc, func(t *testing.T) {
-			got := resolveResourceRequests(c.in)
+			got := resolveResourceRequests(c.in, &corev1.LimitRange{})
+			if d := cmp.Diff(c.want, got, resourceQuantityCmp); d != "" {
+				t.Errorf("Diff(-want, +got): %s", d)
+			}
+		})
+	}
+}
+
+func TestResolveResourceRequests_LimitRange(t *testing.T) {
+	for _, c := range []struct {
+		desc     string
+		in, want []corev1.Container
+	}{{
+		desc: "requests are moved, limits aren't changed",
+		in: []corev1.Container{{
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceCPU: resource.MustParse("10"),
+				},
+			},
+		}, {
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceMemory: resource.MustParse("10Gi"),
+				},
+				Limits: corev1.ResourceList{
+					corev1.ResourceMemory: resource.MustParse("11Gi"),
+				},
+			},
+		}, {
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceEphemeralStorage: resource.MustParse("100Gi"),
+				},
+				Limits: corev1.ResourceList{
+					corev1.ResourceMemory: resource.MustParse("100Gi"),
+				},
+			},
+		}},
+		want: []corev1.Container{{
+			// LimitRangeMinimum applied to container requests
+			Resources: corev1.ResourceRequirements{Requests: corev1.ResourceList{
+				corev1.ResourceCPU:              resource.MustParse("1"),
+				corev1.ResourceMemory:           resource.MustParse("1Gi"),
+				corev1.ResourceEphemeralStorage: resource.MustParse("1Gi"),
+			}},
+		}, {
+			// LimitRangeMinimum applied to container requests
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceCPU:              resource.MustParse("1"),
+					corev1.ResourceMemory:           resource.MustParse("1Gi"),
+					corev1.ResourceEphemeralStorage: resource.MustParse("1Gi"),
+				},
+				Limits: corev1.ResourceList{
+					corev1.ResourceMemory: resource.MustParse("11Gi"),
+				},
+			},
+		}, {
+			// Requests to the max, limits remain.
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceCPU:              resource.MustParse("10"),
+					corev1.ResourceMemory:           resource.MustParse("10Gi"),
+					corev1.ResourceEphemeralStorage: resource.MustParse("100Gi"),
+				},
+				Limits: corev1.ResourceList{
+					corev1.ResourceMemory: resource.MustParse("100Gi"),
+				},
+			},
+		}},
+	}} {
+		t.Run(c.desc, func(t *testing.T) {
+			got := resolveResourceRequests(c.in,
+				&corev1.LimitRange{
+					Spec: corev1.LimitRangeSpec{
+						Limits: []corev1.LimitRangeItem{
+							{
+								Type: "Container",
+								Min: corev1.ResourceList{
+									corev1.ResourceCPU:              resource.MustParse("1"),
+									corev1.ResourceMemory:           resource.MustParse("1Gi"),
+									corev1.ResourceEphemeralStorage: resource.MustParse("1Gi"),
+								},
+							},
+						},
+					},
+				})
 			if d := cmp.Diff(c.want, got, resourceQuantityCmp); d != "" {
 				t.Errorf("Diff(-want, +got): %s", d)
 			}

@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Tekton Authors
+Copyright 2020 The Tekton Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
+var emptyLimitRange = &corev1.LimitRange{}
 var zeroQty = resource.MustParse("0")
 
 func allZeroQty() corev1.ResourceList {
@@ -31,7 +32,7 @@ func allZeroQty() corev1.ResourceList {
 	}
 }
 
-func resolveResourceRequests(containers []corev1.Container) []corev1.Container {
+func resolveResourceRequests(containers []corev1.Container, limitRange *corev1.LimitRange) []corev1.Container {
 	max := allZeroQty()
 	for _, c := range containers {
 		for k, v := range c.Resources.Requests {
@@ -41,10 +42,23 @@ func resolveResourceRequests(containers []corev1.Container) []corev1.Container {
 		}
 	}
 
+	limitRangeItems := limitRange.Spec.Limits
+	min := allZeroQty()
+	if limitRange != emptyLimitRange {
+		for _, limitRangeItem := range limitRangeItems {
+			if limitRangeItem.Type == "Container" {
+				if limitRangeItem.Min != nil {
+					min = limitRangeItem.Min
+				}
+				break
+			}
+		}
+	}
+
 	// Set resource requests for all steps but the last container to
-	// zero.
+	// zeroQty or LimitRange minimum for container.
 	for i := range containers[:len(containers)-1] {
-		containers[i].Resources.Requests = allZeroQty()
+		containers[i].Resources.Requests = min
 	}
 	// Set the last container's request to the max of all resources.
 	containers[len(containers)-1].Resources.Requests = max

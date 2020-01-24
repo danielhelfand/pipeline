@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Tekton Authors
+Copyright 2020 The Tekton Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ const (
 	defaultManagedByLabelValueKey = "default-managed-by-label-value"
 	DefaultManagedByLabelValue    = "tekton-pipelines"
 	defaultPodTemplateKey         = "default-pod-template"
+	defaultLimitRangeNameKey      = "default-limitrange-name"
 )
 
 // Defaults holds the default configurations
@@ -45,6 +46,7 @@ type Defaults struct {
 	DefaultServiceAccount      string
 	DefaultManagedByLabelValue string
 	DefaultPodTemplate         *pod.Template
+	DefaultLimitRange          string
 }
 
 // Equals returns true if two Configs are identical
@@ -92,6 +94,10 @@ func NewDefaultsFromMap(cfgMap map[string]string) (*Defaults, error) {
 			return nil, fmt.Errorf("failed to unmarshal %v", defaultPodTemplate)
 		}
 		tc.DefaultPodTemplate = &podTemplate
+	}
+
+	if defaultLimitRangeName, ok := cfgMap[defaultLimitRangeNameKey]; ok {
+		tc.DefaultLimitRange = defaultLimitRangeName
 	}
 
 	return &tc, nil

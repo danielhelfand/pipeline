@@ -16,8 +16,8 @@ require (
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-containerregistry v0.0.0-20200115214256-379933c9c22b
+	github.com/google/ko v0.0.0-20200116212743-2e28671384da // indirect
 	github.com/googleapis/gnostic v0.3.1 // indirect
-	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc // indirect
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/imdario/mergo v0.3.8 // indirect
@@ -27,8 +27,6 @@ require (
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
-	github.com/onsi/ginkgo v1.10.1 // indirect
-	github.com/onsi/gomega v1.7.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/common v0.7.0 // indirect
@@ -50,7 +48,7 @@ require (
 	gopkg.in/yaml.v2 v2.2.5 // indirect
 	k8s.io/api v0.17.0
 	k8s.io/apimachinery v0.17.1
-	k8s.io/client-go v0.17.0
+	k8s.io/client-go v0.17.1
 	k8s.io/code-generator v0.17.1
 	k8s.io/gengo v0.0.0-20191108084044-e500ee069b5c // indirect
 	k8s.io/kube-openapi v0.0.0-20191107075043-30be4d16710a

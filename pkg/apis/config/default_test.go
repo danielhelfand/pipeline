@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Tekton Authors
+Copyright 2020 The Tekton Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,24 +34,26 @@ func TestNewDefaultsFromConfigMap(t *testing.T) {
 	testCases := []testCase{
 		{
 			expectedConfig: &Defaults{
-				DefaultTimeoutMinutes:      50,
+				DefaultTimeoutMinutes:      60,
 				DefaultServiceAccount:      "tekton",
 				DefaultManagedByLabelValue: "something-else",
+				DefaultLimitRange:          "",
 			},
 			fileName: DefaultsConfigName,
 		},
 		{
 			expectedConfig: &Defaults{
 				DefaultTimeoutMinutes:      50,
-				DefaultServiceAccount:      "tekton",
+				DefaultServiceAccount:      "new-serviceaccount",
 				DefaultManagedByLabelValue: DefaultManagedByLabelValue,
 				DefaultPodTemplate: &pod.Template{
 					NodeSelector: map[string]string{
 						"label": "value",
 					},
 				},
+				DefaultLimitRange: "taskrun-limitrange",
 			},
-			fileName: "config-defaults-with-pod-template",
+			fileName: "config-with-non-defaults",
 		},
 		// the github.com/ghodss/yaml package in the vendor directory does not support UnmarshalStrict
 		// update it, switch to UnmarshalStrict in defaults.go, then uncomment these tests

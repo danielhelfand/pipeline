@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Tekton Authors
+Copyright 2020 The Tekton Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ func TestTaskRunDefaulting(t *testing.T) {
 			return s.ToContext(ctx)
 		},
 	}, {
-		name: "TaskRef default config context with SA",
+		name: "TaskRef default config context with ServiceAccount and LimitRange",
 		in: &v1alpha2.TaskRun{
 			Spec: v1alpha2.TaskRunSpec{
 				TaskRef: &v1alpha2.TaskRef{Name: "foo"},
@@ -178,6 +178,7 @@ func TestTaskRunDefaulting(t *testing.T) {
 				TaskRef:            &v1alpha2.TaskRef{Name: "foo", Kind: v1alpha2.NamespacedTaskKind},
 				Timeout:            &metav1.Duration{Duration: 5 * time.Minute},
 				ServiceAccountName: "tekton",
+				LimitRangeName:     "taskrun-limitrange",
 			},
 		},
 		wc: func(ctx context.Context) context.Context {
@@ -189,6 +190,7 @@ func TestTaskRunDefaulting(t *testing.T) {
 				Data: map[string]string{
 					"default-timeout-minutes": "5",
 					"default-service-account": "tekton",
+					"default-limitrange-name": "taskrun-limitrange",
 				},
 			})
 			return s.ToContext(ctx)

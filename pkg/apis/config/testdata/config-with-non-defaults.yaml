@@ -18,6 +18,9 @@ metadata:
   name: config-defaults
   namespace: tekton-pipelines
 data:
-  default-timeout-minutes: "60"
-  default-service-account: "tekton"
-  default-managed-by-label-value: "something-else"
+  default-timeout-minutes: "50"
+  default-service-account: "new-serviceaccount"
+  default-pod-template: |
+    nodeSelector:
+      label: value
+  default-limitrange-name: "taskrun-limitrange"

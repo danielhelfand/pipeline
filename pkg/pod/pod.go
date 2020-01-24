@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Tekton Authors
+Copyright 2020 The Tekton Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -119,8 +119,19 @@ func MakePod(images pipeline.Images, taskRun *v1alpha1.TaskRun, taskSpec v1alpha
 	initContainers = append(initContainers, entrypointInit)
 	volumes = append(volumes, toolsVolume, downwardVolume)
 
-	// Zero out non-max resource requests, move max resource requests to the last step.
-	stepContainers = resolveResourceRequests(stepContainers)
+	// Get LimitRange by name if present on TaskRunSpec. Otherwise, pass
+	// empty request to resolveResourceRequests.
+	limitRange := &corev1.LimitRange{}
+	if taskRun.Spec.LimitRangeName != "" {
+		limitRange, err = kubeclient.CoreV1().LimitRanges(taskRun.Namespace).Get(taskRun.Spec.LimitRangeName, metav1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Zero out or set non-max resource requests to LimitRange min.
+	// Move max resource requests to the last step.
+	stepContainers = resolveResourceRequests(stepContainers, limitRange)
 
 	// Add implicit env vars.
 	// They're prepended to the list, so that if the user specified any
