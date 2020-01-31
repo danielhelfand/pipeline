@@ -56,6 +56,11 @@ func (trs *TaskRunSpec) SetDefaults(ctx context.Context) {
 		trs.ServiceAccountName = defaultSA
 	}
 
+	defaultLimitRange := cfg.Defaults.DefaultLimitRange
+	if trs.LimitRangeName == "" && defaultLimitRange != "" {
+		trs.LimitRangeName = defaultLimitRange
+	}
+
 	// If this taskrun has an embedded task, apply the usual task defaults
 	if trs.TaskSpec != nil {
 		trs.TaskSpec.SetDefaults(ctx)

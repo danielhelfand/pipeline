@@ -53,6 +53,20 @@ func TestNewDefaultsFromConfigMap(t *testing.T) {
 			},
 			fileName: "config-defaults-with-pod-template",
 		},
+		{
+			expectedConfig: &Defaults{
+				DefaultTimeoutMinutes:      60,
+				DefaultServiceAccount:      "new-serviceaccount",
+				DefaultManagedByLabelValue: DefaultManagedByLabelValue,
+				DefaultPodTemplate: &pod.Template{
+					NodeSelector: map[string]string{
+						"label": "value",
+					},
+				},
+				DefaultLimitRange: "taskrun-limitrange",
+			},
+			fileName: "config-with-non-defaults",
+		},
 		// the github.com/ghodss/yaml package in the vendor directory does not support UnmarshalStrict
 		// update it, switch to UnmarshalStrict in defaults.go, then uncomment these tests
 		// {
